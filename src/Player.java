@@ -18,14 +18,14 @@ public class Player extends GameObject{
     private SpriteSheet playerR;
 
     private Animation idleRight,idleLeft;
-    private Animation idleSwordRight;
+    private Animation idleSwordRight,idleSwordLeft;
     private Animation runRight,runLeft;
     private BufferedImage jumpAnim[][] = new BufferedImage[2][2];
 
     private boolean swordOut = false;
     private int atkCycle = 1;
     private int atkTimer = 0;
-    private Animation atkAnim,atkAnim2,atkAnim3;
+    private Animation atkAnim[][] = new Animation[2][3];
     private boolean attacking = false;
 
     Handler handler;
@@ -47,19 +47,35 @@ public class Player extends GameObject{
         idleRight = new Animation(10,playerR.grabImage(1,1),playerR.grabImage(1,2),playerR.grabImage(1,3),playerR.grabImage(1,4));
         idleSwordRight = new Animation(10, playerR.grabImage(6,4),playerR.grabImage(6,5),playerR.grabImage(6,6),playerR.grabImage(6,7));
         idleLeft = new Animation(10,playerL.grabImage(1,7),playerL.grabImage(1,6),playerL.grabImage(1,5),playerL.grabImage(1,4));
+        idleSwordLeft = new Animation(10, playerR.grabImage(6,4),playerR.grabImage(6,3),playerR.grabImage(6,2),playerR.grabImage(6,1));
         runRight = new Animation(10,playerR.grabImage(2,2),playerR.grabImage(2,3),playerR.grabImage(2,4),playerR.grabImage(2,5),playerR.grabImage(2,6),playerR.grabImage(2,7));
         runLeft = new Animation(10,playerL.grabImage(2,6),playerL.grabImage(2,5),playerL.grabImage(2,4),playerL.grabImage(2,3),playerL.grabImage(2,2),playerL.grabImage(2,1));
-        atkAnim = new Animation(5,"once",playerR.grabImage(7,1),playerR.grabImage(7,2),playerR.grabImage(7,3),playerR.grabImage(7,4),playerR.grabImage(7,5),playerR.grabImage(7,6),playerR.grabImage(7,7));     
-        atkAnim2 = new Animation(5,"once",playerR.grabImage(8,1),playerR.grabImage(8,2),playerR.grabImage(8,3),playerR.grabImage(8,4));
-        atkAnim3 = new Animation(5,"once",playerR.grabImage(8,5),playerR.grabImage(8,6),playerR.grabImage(8,7),playerR.grabImage(9,1),playerR.grabImage(9,2),playerR.grabImage(9,3));
 
-        BufferedImage[][] temp = {
+        Animation[][] temp = {
+            {
+                new Animation(5,"once",playerR.grabImage(7,1),playerR.grabImage(7,2),playerR.grabImage(7,3),playerR.grabImage(7,4),playerR.grabImage(7,5),playerR.grabImage(7,6),playerR.grabImage(7,7)),
+                new Animation(5,"once",playerR.grabImage(8,1),playerR.grabImage(8,2),playerR.grabImage(8,3),playerR.grabImage(8,4)),
+                new Animation(5,"once",playerR.grabImage(8,5),playerR.grabImage(8,6),playerR.grabImage(8,7),playerR.grabImage(9,1),playerR.grabImage(9,2),playerR.grabImage(9,3))
+            },
+            {
+                new Animation(5,"once",playerL.grabImage(7,7),playerL.grabImage(7,6),playerL.grabImage(7,5),playerL.grabImage(7,4),playerL.grabImage(7,3),playerL.grabImage(7,2),playerL.grabImage(7,1)),
+                new Animation(5,"once",playerL.grabImage(8,7),playerL.grabImage(8,6),playerL.grabImage(8,5),playerL.grabImage(8,4)),
+                new Animation(5,"once",playerL.grabImage(8,3),playerL.grabImage(8,2),playerL.grabImage(8,1),playerL.grabImage(9,7),playerL.grabImage(9,6),playerL.grabImage(9,5))
+            }
+        };
+        for(int i=0;i<2;i++){
+            for(int j=0;j<3;j++){
+                atkAnim[i][j] = temp[i][j];
+            }
+        }
+
+        BufferedImage[][] ttemp = {
             {playerR.grabImage(3,1),playerR.grabImage(3,2)},
             {playerL.grabImage(3,7),playerL.grabImage(3,6)}
         };
         for(int i=0;i<2;i++){
             for(int j=0;j<2;j++){
-                jumpAnim[i][j] = temp[i][j];
+                jumpAnim[i][j] = ttemp[i][j];
             }
         }
     }
@@ -105,14 +121,26 @@ public class Player extends GameObject{
             idleSwordRight.runAnimation();
         }
         if(attacking){
-            atkAnim.runAnimation();
-            atkAnim2.runAnimation();
-            atkAnim3.runAnimation();
+            for(int i=0;i<2;i++){
+                for(int j=0;j<3;j++){
+                    atkAnim[i][j].runAnimation();
+                }
+            }
         }
-        if(atkAnim.isDone() && atkAnim2.isDone() && atkAnim3.isDone()){
-            atkAnim.reset();
-            atkAnim2.reset();
-            atkAnim3.reset();
+        boolean b = true;
+        for(int i=0;i<2;i++){
+            for(int j=0;j<3;j++){
+                if(!atkAnim[i][j].isDone()){
+                    b = false;
+                }
+            }
+        }
+        if(b){
+            for(int i=0;i<2;i++){
+                for(int j=0;j<3;j++){
+                    atkAnim[i][j].reset();
+                }
+            }
             attacking = false;
         }
     }
@@ -131,9 +159,9 @@ public class Player extends GameObject{
     public void draw(Graphics g){
         if (lastDir.equals("R")){
             if (attacking){ 
-                if(atkCycle == 1) atkAnim.draw(g,x-w/2,y-h/2);
-                else if(atkCycle == 2) atkAnim2.draw(g,x-w/2,y-h/2);
-                else if(atkCycle == 3) atkAnim3.draw(g,x-w/2,y-h/2);
+                if(atkCycle == 1) atkAnim[0][0].draw(g,x-w/2,y-h/2);
+                else if(atkCycle == 2) atkAnim[0][1].draw(g,x-w/2,y-h/2);
+                else if(atkCycle == 3) atkAnim[0][2].draw(g,x-w/2,y-h/2);
             }else{
                 if(jumping){
                     if(velY < 0) g.drawImage(jumpAnim[0][0],x-w/2,y-h/2,null);
@@ -146,12 +174,21 @@ public class Player extends GameObject{
                 }
             }
         }else{
-            if (jumping) 
-                if(velY < 0) g.drawImage(jumpAnim[1][0],x-w/2,y-h/2,null);
-                else g.drawImage(jumpAnim[1][1],x-w/2,y-h/2,null);
-            else
-                if (velX != 0) runLeft.draw(g,x-w/2,y-h/2);
-                else idleLeft.draw(g,x-w/2,y-h/2);
+            if (attacking){ 
+                if(atkCycle == 1) atkAnim[1][0].draw(g,x-w/2,y-h/2);
+                else if(atkCycle == 2) atkAnim[1][1].draw(g,x-w/2,y-h/2);
+                else if(atkCycle == 3) atkAnim[1][2].draw(g,x-w/2,y-h/2);
+            }else{
+                if(jumping){
+                    if(velY < 0) g.drawImage(jumpAnim[1][0],x-w/2,y-h/2,null);
+                    else g.drawImage(jumpAnim[1][1],x-w/2,y-h/2,null);
+                }else{ 
+                    if (velX != 0) runLeft.draw(g,x-w/2,y-h/2);
+                    else 
+                        if(swordOut) idleSwordLeft.draw(g,x-w/2,y-h/2);
+                        else idleLeft.draw(g,x-w/2,y-h/2);
+                }
+            }
         }
         drawFrame(g);
         for(int x=1;x<=7;x++){
